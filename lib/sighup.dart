@@ -3,8 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_google/allcolors.dart';
 import 'package:flutter_google/firebase_stream.dart';
+import 'package:flutter_google/home.dart';
 import 'package:flutter_google/signin.dart';
 import 'package:flutter_google/snacks.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class SighupMain extends StatefulWidget{
   const SighupMain({super.key});
@@ -32,6 +34,19 @@ class _SighUpState extends State<SighupMain>{
     setState(() {
       isHidden=!isHidden;
     });
+  }
+
+  Future<void> signInWithGoogle() async{
+    try{
+      final GoogleSignInAccount? googleSignInAccount=await GoogleSignIn().signIn();
+      final GoogleSignInAuthentication? auth=await googleSignInAccount?.authentication;
+      final credential =GoogleAuthProvider.credential(accessToken: auth?.accessToken,
+      idToken: auth?.idToken);
+      await FirebaseAuth.instance.signInWithCredential(credential);
+    } on Exception catch (e){
+      print('exception->$e');
+    }
+    Navigator.push(context, MaterialPageRoute(builder: (context)=>const Home()));
   }
 
   Future<void> signUp() async{
@@ -92,9 +107,7 @@ class _SighUpState extends State<SighupMain>{
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text("Or use", style: TextStyle(fontSize: 12, color: Allcolors.misty),),
-                ElevatedButton(onPressed: (){
-
-                }, style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent), child: const Text("Google", style: TextStyle(fontSize: 12, color: Allcolors.misty),))
+                ElevatedButton(onPressed: signInWithGoogle, style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent), child: const Text("Google", style: TextStyle(fontSize: 12, color: Allcolors.misty),))
               ],
             ),
             ],),

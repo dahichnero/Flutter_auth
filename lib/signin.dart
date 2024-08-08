@@ -6,6 +6,7 @@ import 'package:flutter_google/home.dart';
 import 'package:flutter_google/new_pass.dart';
 import 'package:flutter_google/sighup.dart';
 import 'package:flutter_google/snacks.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class SignInMy extends StatefulWidget{
   const SignInMy({super.key});
@@ -32,6 +33,19 @@ class _SignInState extends State<SignInMy>{
     setState(() {
       isHideen=!isHideen;
     });
+  }
+
+  Future<void> signInWithGoogle() async{
+    try{
+      final GoogleSignInAccount? googleSignInAccount=await GoogleSignIn().signIn();
+      final GoogleSignInAuthentication? auth=await googleSignInAccount?.authentication;
+      final credential =GoogleAuthProvider.credential(accessToken: auth?.accessToken,
+      idToken: auth?.idToken);
+      await FirebaseAuth.instance.signInWithCredential(credential);
+    } on Exception catch (e){
+      print('exception->$e');
+    }
+    Navigator.push(context, MaterialPageRoute(builder: (context)=>const Home()));
   }
 
   Future<void> login() async{
@@ -92,9 +106,7 @@ class _SignInState extends State<SignInMy>{
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text("You can sign in with", style: TextStyle(fontSize: 12, color: Allcolors.misty),),
-                  ElevatedButton(onPressed: (){
-
-                  }, style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent), child: const Text("Google", style: TextStyle(fontSize: 12, color: Allcolors.misty),))
+                  ElevatedButton(onPressed: signInWithGoogle, style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent), child: const Text("Google", style: TextStyle(fontSize: 12, color: Allcolors.misty),))
                 ],
             ),
             TextButton(onPressed: (){
